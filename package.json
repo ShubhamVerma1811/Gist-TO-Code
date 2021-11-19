@@ -1,8 +1,12 @@
 {
   "name": "gist-to-code",
   "displayName": "Gist To Code",
-  "icon": "./images/logo.jpg",
+  "icon": "images/logo.jpg",
+  "publisher": "ShubhamVerma18",
   "description": "VSCode Extension to Open any public gist files into VSCode",
+  "repository": {
+    "url": "https://github.com/ShubhamVerma1811/Gist-To-Code"
+  },
   "author": {
     "name": "Shubham Verma"
   },
