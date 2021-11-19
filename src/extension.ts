@@ -1,25 +1,43 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
-import * as vscode from 'vscode';
+import * as vscode from "vscode";
+import axios from "axios";
 
-// this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
-	
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "gist-to-code" is now active!');
+  let disposable = vscode.commands.registerCommand(
+    "gist-to-code.opengist",
+    async () => {
+      const url = await vscode.window.showInputBox({
+        placeHolder: "Enter the Gist URL or the ID",
+        title: "Gist URL or ID",
+      });
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	let disposable = vscode.commands.registerCommand('gist-to-code.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from Gist To Code!');
-	});
+      if (url) {
+        try {
+          const gistId = url.match(/\b\w{32}\b/)?.[0];
+          const gist = await axios.get(
+            `https://api.github.com/gists/${gistId}`
+          );
+          for (let _file in gist.data.files) {
+            const file = gist.data.files[_file];
 
-	context.subscriptions.push(disposable);
+            // TODO: Open Document that is already saved. Example: Link opening new Untitled File does.
+            const doc = await vscode.workspace.openTextDocument({
+              content: file.content,
+              language: file.language, // TODO: detect language
+            });
+
+            await vscode.window.showTextDocument(doc);
+          }
+        } catch (error) {
+          console.error(error);
+          vscode.window.showErrorMessage(
+            "Something went wrong.Gist ID might not be right."
+          );
+        }
+      }
+    }
+  );
+
+  context.subscriptions.push(disposable);
 }
 
 // this method is called when your extension is deactivated
